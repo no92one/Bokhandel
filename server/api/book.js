@@ -14,21 +14,25 @@ export default function (server) {
   })
 
   server.post("/api/books", async (req, res) => {
-    try {
-      const newBook = new Book({
-        title: req.body.title,
-        description: req.body.description,
-        author: req.body.authorId
-      })
-      const savedBook = await newBook.save()
+    if (req.session.login) {
+      try {
+        const newBook = new Book({
+          title: req.body.title,
+          description: req.body.description,
+          author: req.body.authorId
+        })
+        const savedBook = await newBook.save()
 
-      const author = await Author.findById(req.body.authorId)
-      author.books.push(newBook._id)
-      await author.save()
+        const author = await Author.findById(req.body.authorId)
+        author.books.push(newBook._id)
+        await author.save()
 
-      res.status(201).json(savedBook)
-    } catch (err) {
-      res.status(500).json({ message: "Något gick fel när vi i /api/books-routen" })
+        res.status(201).json(savedBook)
+      } catch (err) {
+        res.status(500).json({ message: "Något gick fel när vi i /api/books-routen" })
+      }
+    } else {
+      res.json({ message: "Du måste logga in!" })
     }
 
   })

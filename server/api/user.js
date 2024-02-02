@@ -17,15 +17,22 @@ export default function (server) {
   })
 
   server.post("/api/login", async (req, res) => {
-    // if (req.session.User)
-    const user = await User.findOne({
-      username: req.body.username,
-      password: req.body.password
-    })
+    if (req.session.login) {
+      res.json({ message: "Det finns redan en inloggad användare!" })
+    } else {
+      const user = await User.findOne({
+        username: req.body.username,
+        password: req.body.password
+      })
 
-    req.session.login = user._id
-    res.json({ message: "Du har lyckats logga in." })
-
-    res.json(user)
+      if (user) {
+        req.session.login = user._id
+        res.json({ mysession: req.session, message: `Du har lyckats logga in som ${user.username}.` })
+      } else {
+        res.json({ message: "Hitta ingen användare. Fel användarnamn eller lösenord." })
+      }
+    }
   })
+
+
 }
